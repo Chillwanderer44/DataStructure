@@ -25,16 +25,35 @@ void displayArrayMenu() {
 }
 
 int main() {
+    // Relative file paths for transactions and reviews
+    // Ensure these files are in the same directory as the executable
+
+    const char* transactionFile = "transactions_cleaned.csv";
+    const char* reviewFile = "reviews_cleaned.csv";
+
     Transaction transactions[MAX_TRANSACTIONS];
     CustomerReview reviews[MAX_REVIEWS];
     int transactionCount = 0, reviewCount = 0;
 
-    // Load transaction data from CSV
-    readcsv("/Users/amiryusof/Documents/Data Structures/Assignment/implementation/transactions_cleaned.csv", transactions, transactionCount);
+    // Load transactions and reviews from CSV
+    readcsv(transactionFile, transactions, transactionCount);
+    if (transactionCount == 0){
+        std::cout << "No transactions found or failed to load the file " << endl; 
+        std::cout << "Please check if the file exists in the current directory." << endl;
+        return 1;
+    }
+    std::cout << "Successfully loaded " << transactionCount << " transactions " << endl;
 
-    // Load customer reviews from CSV
-    readReviews("/Users/amiryusof/Documents/Data Structures/Assignment/implementation/reviews_cleaned.csv", reviews, reviewCount);
+    readReviews(reviewFile, reviews, reviewCount);
 
+    if(reviewCount == 0){
+        std::cout << "No reviews found or failed to load the file " << endl;
+        std::cout << "Please check if the file exists in the current directory." << endl;
+        return 1;
+    }
+    std::cout << "Sucessfully loaded " << reviewCount << "reviews " << endl;
+
+    // Main menu loop
     int choice = 0;
 
     while (true) {
