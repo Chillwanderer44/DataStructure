@@ -1,4 +1,5 @@
 #include "array.hpp"
+#include "linkedlist.hpp"
 #include <iostream>
 
 using namespace std;
@@ -127,8 +128,64 @@ int main() {
         
         
         else if (choice == 2) {
-            cout << "Linked list functionality is not implemented yet.\n";
-            // Here, you'd later integrate linked list operations.
+            // Linked List structure initialized
+            TransactionList transactionlist;
+            ReviewList reviewlist;
+
+            //Load data
+            transactionlist.loadFromCSV(transactionFile);
+            reviewlist.loadFromCSV(reviewFile);
+
+            int linkedListChoice = 0;
+            while(true){
+                displayLinkedListMenu();
+                cin >> linkedListChoice;
+
+                if (linkedListChoice == 1) {
+                    char customerID[MAX_STRING_LENGTH];
+                    do {
+                        cout << "Enter Customer ID to search: ";
+                        cin >> customerID;
+                        transactionlist.searchByCustomerID(customerID);
+        
+                        cout << "\nDo you want to search again? (Yes = 1 / No = 0): ";
+                        cin >> linkedListChoice;
+                    } while (linkedListChoice == 1);
+                } 
+        
+                else if (linkedListChoice == 2) {
+                    do {
+                        transactionlist.filterTransactions();
+                        cout << "\nDo you want to filter again? (Yes = 1 / No = 0): ";
+                        cin >> linkedListChoice;
+                    } while (linkedListChoice == 1);
+                }
+        
+                else if (linkedListChoice == 3) {
+                    do {
+                        transactionlist.sortByDate();
+                        cout << "\nDo you want to sort again? (Yes = 1 / No = 0): ";
+                        cin >> linkedListChoice;
+                    } while (linkedListChoice == 1);
+                }
+        
+                else if (linkedListChoice == 4) {
+                    do {
+                        reviewlist.processReviews();
+                        cout << "\nDo you want to analyze reviews again? (Yes = 1 / No = 0): ";
+                        cin >> linkedListChoice;
+                    } while (linkedListChoice == 1);
+                }
+        
+                else if (linkedListChoice == 5) {
+                    cout << "Linked List performance comparison is not implemented yet.\n";
+                }
+        
+                else if (linkedListChoice == 6) {
+                    cout << "Returning to main menu...\n";
+                    break;
+                }
+            }
         } 
         
         else if (choice == 3) {
