@@ -50,9 +50,33 @@ class TransactionList {
         void bubbleSort();
         void insertionSort();
         void mergeSort();
+        void sortByDate();
 
         //performance measurement
         void measureSortingPerformance();
 };
+//linked list class for reviews
+class ReviewList {
+    private:
+        NodeReview* head;
+        int size;
+    public:
+        //Destructor and constructor
+        ReviewList();
+        ~ReviewList();
+
+        //Basic operations
+        void insert(CustomerReview review);
+        void display();
+        int getSize() const;
+        NodeReview* getHead() const;
+        void clear();
+
+        //Core functionality
+        void loadFromCSV(const char* filename);
+        void processReviews();
+};
+//Helper function to clean a word
+void cleanWord(string& word);
 
 #endif
