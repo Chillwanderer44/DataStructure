@@ -1,3 +1,4 @@
+#include "helpers.hpp"
 #include "array.hpp"
 #include "linkedlist.hpp"
 #include <iostream>
@@ -192,7 +193,11 @@ int main() {
                 }
         
                 else if (linkedListChoice == 5) {
-                    cout << "Linked List performance comparison is not implemented yet.\n";
+                    do {
+                        transactionlist.measureSortingPerformance();
+                        cout << "\nDo you want to compare sorting performance again? (Yes = 1 / No = 0): ";
+                        cin >> linkedListChoice;
+                    } while (linkedListChoice == 1);
                 }
         
                 else if (linkedListChoice == 6) {

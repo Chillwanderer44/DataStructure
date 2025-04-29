@@ -380,58 +380,6 @@ void TransactionList::sortByDate() {
     // display();
 }
 
-// Performance measurement function
-void TransactionList::measureSortingPerformance() {
-    // Create three copies of the current list for testing
-    TransactionList bubbleList, insertionList, mergeList;
-    
-    // Copy current list to test lists
-    NodeTransaction* current = head;
-    while (current != nullptr) {
-        bubbleList.insert(current->data);
-        insertionList.insert(current->data);
-        mergeList.insert(current->data);
-        current = current->next;
-    }
-    
-    cout << "Measuring sorting performance for " << getSize() << " transactions:" << endl;
-    cout << "------------------------------------------------------" << endl;
-    
-    // Measure Bubble Sort
-    auto start1 = high_resolution_clock::now();
-    bubbleList.bubbleSort();
-    auto end1 = high_resolution_clock::now();
-    auto duration1 = duration_cast<microseconds>(end1 - start1);
-    
-    // Measure Insertion Sort
-    auto start2 = high_resolution_clock::now();
-    insertionList.insertionSort();
-    auto end2 = high_resolution_clock::now();
-    auto duration2 = duration_cast<microseconds>(end2 - start2);
-    
-    // Measure Merge Sort
-    auto start3 = high_resolution_clock::now();
-    mergeList.mergeSort();
-    auto end3 = high_resolution_clock::now();
-    auto duration3 = duration_cast<microseconds>(end3 - start3);
-    
-    // Report results
-    cout << "Bubble Sort:    " << duration1.count() << " microseconds" << endl;
-    cout << "Insertion Sort: " << duration2.count() << " microseconds" << endl;
-    cout << "Merge Sort:     " << duration3.count() << " microseconds" << endl;
-    cout << "------------------------------------------------------" << endl;
-    
-    // Show the most efficient method
-    if (duration1.count() <= duration2.count() && duration1.count() <= duration3.count()) {
-        cout << "Bubble Sort was fastest for this dataset." << endl;
-    } else if (duration2.count() <= duration1.count() && duration2.count() <= duration3.count()) {
-        cout << "Insertion Sort was fastest for this dataset." << endl;
-    } else {
-        cout << "Merge Sort was fastest for this dataset." << endl;
-    }
-}
-
-
 //ReviewList constructor
 ReviewList::ReviewList() : head(nullptr), size(0){}
 
@@ -628,6 +576,74 @@ void ReviewList::processReviews(){
     }
 }
 
+
+// sorting performance measurement
+// 3 algorithms are used to compare the performance
+// insertion sort, bubble sort and merge sort
+
+void TransactionList::measureSortingPerformance(){
+    if (size == 0) {
+        cout << "No transactions to sort, please check your data" << endl;
+        return;
+    }
+
+    // Create 3 copies of the list to test each algorithm
+    TransactionList bubbleList, insertionList, mergeList;
+
+    //copt current list to test lists
+    NodeTransaction** nodesArray = new NodeTransaction*[size];
+    NodeTransaction* current = head;
+    int i = 0;
+    while (current != nullptr) {
+        nodesArray[i++] = current;
+        current = current->next;
+    }
+
+    // Populate the lists in reverse order of the array
+    for (int j = size - 1; j >= 0; j--) {
+        bubbleList.insert(nodesArray[j]->data);
+        insertionList.insert(nodesArray[j]->data);
+        mergeList.insert(nodesArray[j]->data);
+    }
+
+    delete[] nodesArray; // Free the array of pointers
+
+    cout << "Measuring sorting performance for " << size << " transactions:" << endl;
+    cout << "------------------------------------------------------" << endl;
+
+    // Measure bubble sort
+    auto start1 = high_resolution_clock::now();
+    bubbleList.bubbleSort();
+    auto end1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<microseconds>(end1 - start1);
+
+    // measur insetion sort
+    auto start2 = high_resolution_clock::now();
+    insertionList.insertionSort(); 
+    auto end2 = high_resolution_clock::now();
+    auto duration2 = duration_cast<microseconds>(end2 - start2);
+
+    //measure merge sort
+    auto start3 = high_resolution_clock::now();
+    mergeList.mergeSort();
+    auto end3 = high_resolution_clock::now();
+    auto duration3 = duration_cast<microseconds>(end3 - start3);
+
+    // resutls
+    cout << "Bubble Sort:    " << duration1.count() << " microseconds" << endl;
+    cout << "Insertion Sort: " << duration2.count() << " microseconds" << endl;
+    cout << "Merge Sort:     " << duration3.count() << " microseconds" << endl;
+    cout << "------------------------------------------------------" << endl;
+
+    // Show the best method
+    if(duration1.count() <= duration2.count() && duration1.count() <= duration3.count()){
+        cout << "Bubble Sort was fastest for this dataset." << endl;
+    } else if (duration2.count() <= duration1.count() && duration2.count() <= duration3.count()){
+        cout << "Insertion Sort was fastest for this dataset." << endl;
+    } else {
+        cout << "Merge Sort was fastest for this dataset." << endl;
+    }
+}
 // End of linkedlist.cpp
 
 
