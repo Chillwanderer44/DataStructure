@@ -1,3 +1,4 @@
+#include "helpers.hpp"
 #include "linkedlist.hpp"
 #include <iostream>
 #include <fstream>
@@ -124,33 +125,6 @@ void TransactionList::searchByCustomerID(const char* customerID){
     }
 }
 
-// Helper function to parse data (same as in array.cpp)
-Date parseDate(const char* dateStr){
-    Date date;
-    sscanf(dateStr, "%d/%d/%d", &date.day, &date.month, &date.year);
-    return date;
-}
-
-// Helper function to compare two dates
-int compareDates(const char* date1, const char* date2){
-    Date d1 = parseDate(date1);
-    Date d2 = parseDate(date2);
-
-    //compare first year, then month, then day
-    if(d1.year != d2.year) return d1.year - d2.year;
-    if(d1.month != d2.month) return d1.month - d2.month;
-    return d1.day - d2.day;
-}
-
-// helper function check if date is within a range
-bool isDateInRange(const char* transactionDate, const char* startDate, const char* endDate){
-    if(strcmp(startDate, "-") == 0 || strcmp(endDate, "-") == 0) return true;
-
-    //check if date is between start and end dates
-    return compareDates(transactionDate, startDate) >= 0 && 
-    compareDates(transactionDate, endDate) <= 0;
-}
-
 // filter transactions based on multiple criteria (e.g product, category, price)
 void TransactionList::filterTransactions(){
     char productFilter[MAX_STRING_LENGTH], categoryFilter[MAX_STRING_LENGTH], paymentMethodFilter[MAX_STRING_LENGTH];
@@ -226,8 +200,6 @@ void TransactionList::filterTransactions(){
     cout << "\nTotal: " << matchCount << " transactions match the filters.\n";
 
 }
-
-// Add these to your linkedlist.cpp file
 
 // Bubble sort implementation for linked list
 void TransactionList::bubbleSort() {
@@ -547,22 +519,6 @@ void ReviewList::loadFromCSV(const char* filename){
     std::cout << "loaded" << size << "reviews from " << filename << endl;
 }
 
-//clean word - remove punctuation and convert to lowercase
-void cleanWord(string& word){
-    //convert to lowercase
-    for (int i =0; i < word.length(); i++){
-        word[i] = tolower(word[i]);
-    }
-    //remove punctuation
-    string result;
-    for (int i = 0; i < word.length(); i++){
-        if(!ispunct(word[i])){
-            result += word[i];
-        }
-        word = result;
-    }
-}
-
 //processs reviews to find the most common word
 void ReviewList::processReviews(){
     int chosenRating;
@@ -672,20 +628,7 @@ void ReviewList::processReviews(){
     }
 }
 
-// Display menu for linked list operations
-// Add this function to linkedlist.cpp
-
-// Display menu for linked list operations
-void displayLinkedListMenu() {
-    cout << "\n===== LINKED LIST OPERATIONS =====\n";
-    cout << "1. Search by Customer ID\n";
-    cout << "2. Filter Transactions\n";
-    cout << "3. Sort Transactions by Date\n";
-    cout << "4. Analyze Reviews\n";
-    cout << "5. Compare Sorting Performance\n";
-    cout << "6. Return to Main Menu\n";
-    cout << "Enter your choice: ";
-}
+// End of linkedlist.cpp
 
 
 

@@ -1,3 +1,4 @@
+#include "helpers.hpp"
 #include "array.hpp"
 #include <iostream>
 #include <fstream>
@@ -55,27 +56,6 @@ void searchdata(Transaction transactions[], int count, const char* customerID) {
     if (!found) {
         cout << "Customer ID not found." << endl;
     }
-}
-
-Date parseDate(const char* dateStr) {
-    Date date;
-    sscanf(dateStr, "%d/%d/%d", &date.day, &date.month, &date.year);
-    return date;
-}
-// Function to compare two dates numerically
-int compareDates(const char* date1, const char* date2) {
-    Date d1 = parseDate(date1);
-    Date d2 = parseDate(date2);
-
-    if (d1.year != d2.year) return d1.year - d2.year;
-    if (d1.month != d2.month) return d1.month - d2.month;
-    return d1.day - d2.day;
-}
-// Function to check if a transaction's date falls within a range
-bool isDateInRange(const char* transactionDate, const char* startDate, const char* endDate) {
-    if (strcmp(startDate, "-") == 0 || strcmp(endDate, "-") == 0) return true;
-
-    return compareDates(transactionDate, startDate) >= 0 && compareDates(transactionDate, endDate) <= 0;
 }
 
 void trim(char* str) {
@@ -217,12 +197,6 @@ void measureSortingPerformance(Transaction transactions[], int count) {
     cout << "Sorting completed in " << duration.count() << " microseconds.\n";
 }
 // Read and store reviews manually using an array
-void cleanWord(string& word) {
-    // Convert to lowercase
-    transform(word.begin(), word.end(), word.begin(), ::tolower);
-    // Remove punctuation
-    word.erase(remove_if(word.begin(), word.end(), ::ispunct), word.end());
-}
 // Function to read customer reviews from CSV
 void readReviews(const char* filename, CustomerReview reviews[], int& count) {
     ifstream file(filename);

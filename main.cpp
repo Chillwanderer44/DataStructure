@@ -14,6 +14,7 @@ void displayMainMenu() {
     cout << "Enter your choice: ";
 }
 
+// Display menu for array operations
 void displayArrayMenu() {
     cout << "Array Operations:\n";
     cout << "1. Search by Customer ID\n";
@@ -24,6 +25,19 @@ void displayArrayMenu() {
     cout << "6. Return to Main Menu\n";
     cout << "Enter your choice: ";
 }
+
+// Display menu for linked list operations
+void displayLinkedListMenu() {
+    cout << "\n===== LINKED LIST OPERATIONS =====\n";
+    cout << "1. Search by Customer ID\n";
+    cout << "2. Filter Transactions\n";
+    cout << "3. Sort Transactions by Date\n";
+    cout << "4. Analyze Reviews\n";
+    cout << "5. Compare Sorting Performance\n";
+    cout << "6. Return to Main Menu\n";
+    cout << "Enter your choice: ";
+}
+
 
 int main() {
     // Relative file paths for transactions and reviews
