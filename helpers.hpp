@@ -1,5 +1,5 @@
-#ifndef HELPER_HPP
-#define HELPER_HPP
+#ifndef HELPERS_HPP
+#define HELPERS_HPP
 
 #include <iostream>
 #include "array.hpp"

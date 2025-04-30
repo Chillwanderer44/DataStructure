@@ -54,7 +54,14 @@ class TransactionList {
 
         //performance measurement
         void measureSortingPerformance();
+
+        //Searching algorthms
+        void linearSearchByCustomerID(const char* customerID);
+        void binarySearchByCustomerID(const char* customerID);
+        void sortByCustomerID(); // Sort before binary search
+        void compareSearchAlgorithms();
 };
+
 //linked list class for reviews
 class ReviewList {
     private:

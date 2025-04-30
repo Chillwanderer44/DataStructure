@@ -100,12 +100,40 @@ void TransactionList::loadFromCSV (const char* filename){
 }
 
 // function to search for customer using customer ID
-void TransactionList::searchByCustomerID(const char* customerID){
+void TransactionList::searchByCustomerID(const char* customerID) {
+    int choice;
+    cout << "Choose search algorithm:" << endl;
+    cout << "1. Linear Search" << endl;
+    cout << "2. Binary Search (requires sorted data)" << endl;
+    cout << "Enter choice: ";
+    cin >> choice;
+    
+    switch (choice) {
+        case 1:
+            linearSearchByCustomerID(customerID);
+            break;
+        case 2:
+            binarySearchByCustomerID(customerID);
+            break;
+        default:
+            cout << "Invalid choice. Using Linear Search by default." << endl;
+            linearSearchByCustomerID(customerID);
+            break;
+    }
+}
+//linear search by customer ID
+// This function will search through the linked list for a specific customer ID
+
+void TransactionList::linearSearchByCustomerID(const char* customerID) {
+    auto start = high_resolution_clock::now();  // Start timing
+    
     bool found = false;
     NodeTransaction* current = head;
+    int comparisons = 0;
 
-    while(current != nullptr){
-        if(strcmp(current->data.customerID, customerID) == 0){
+    while(current != nullptr) {
+        comparisons++;
+        if(strcmp(current->data.customerID, customerID) == 0) {
             found = true;
 
             cout << "--------------------------------------" << endl;
@@ -120,10 +148,279 @@ void TransactionList::searchByCustomerID(const char* customerID){
         current = current->next;
     }
 
-    if(!found){
+    auto end = high_resolution_clock::now();  // End timing
+    auto duration = duration_cast<microseconds>(end - start);
+
+    if(!found) {
         cout << "Customer ID NOT found." << endl;
     }
+    
+    cout << "Linear Search completed." << endl;
+    cout << "Comparisons: " << comparisons << endl;
+    cout << "Time taken: " << duration.count() << " microseconds." << endl;
 }
+//Sort linked list by customer ID (required for binary search)
+void TransactionList::sortByCustomerID(){
+    if (head == nullptr || head->next == nullptr)
+        return; // 0 or 1 node - already sorted
+
+    auto start = high_resolution_clock::now(); // start timer
+
+    bool swapped;
+    NodeTransaction* ptr1;
+    NodeTransaction* lptr = nullptr;
+
+    do {
+        swapped = false;
+        ptr1 = head;
+
+        while(ptr1->next != lptr) {
+            if (strcmp(ptr1->data.customerID, ptr1->next->data.customerID) > 0) {
+                // Swap data (not pointers)
+                Transaction temp = ptr1->data;
+                ptr1->data = ptr1->next->data;
+                ptr1->next->data = temp;
+                swapped = true;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1; 
+    } while (swapped);
+
+    auto end = high_resolution_clock::now(); // end timer
+    auto duration = duration_cast<microseconds>(end - start);
+
+    cout << "Sorted Customer IDs using Bubble Sort" << endl;
+    cout << "Time taken: " << duration.count() << " microseconds." << endl;
+}
+
+// Binary Search by Customer ID
+// Sorting is required before binary search
+void TransactionList::binarySearchByCustomerID(const char* customerID){
+    //check if the list is sorted
+    NodeTransaction* prev = head;
+    NodeTransaction* current = head ? head->next : nullptr;
+    bool isSorted = true;
+
+    while (current != nullptr) {
+        if (strcmp(prev->data.customerID, current->data.customerID) > 0){
+            isSorted = false;
+            break;
+        }
+        prev = current;
+        current = current->next;
+    }
+
+    if (!isSorted) {
+        cout << "List is not sorted. Please sort the list before searching." << endl;
+        sortByCustomerID();
+    }
+
+    auto start = high_resolution_clock::now();  // Start timer
+
+    //convert list to array for binary search
+    Transaction* arr = new Transaction[size];
+    NodeTransaction* node = head;
+    int index = 0;
+
+    while (node != nullptr){
+        arr[index++] = node->data;
+        node = node->next;
+    }
+
+    // Binary search implementation
+    int left = 0;
+    int right = size -1;
+    bool found = false;
+    int comparisons = 0;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        comparisons++;
+        
+        int comparison = strcmp(arr[mid].customerID, customerID);
+        
+        if (comparison == 0) {
+            found = true;
+            
+            cout << "--------------------------------------" << endl;
+            cout << "Customer ID       : " << arr[mid].customerID << endl;
+            cout << "Product           : " << arr[mid].product << endl;
+            cout << "Category          : " << arr[mid].category << endl;
+            cout << "Price             : " << fixed << setprecision(2) << arr[mid].price << endl;
+            cout << "Date              : " << arr[mid].date << endl;
+            cout << "Payment Method    : " << arr[mid].paymentMethod << endl;
+            cout << "--------------------------------------" << endl;
+            
+            // Check for other instances with the same customer ID
+            // Check left
+            int temp = mid - 1;
+            while (temp >= 0 && strcmp(arr[temp].customerID, customerID) == 0) {
+                comparisons++;
+                cout << "--------------------------------------" << endl;
+                cout << "Customer ID       : " << arr[temp].customerID << endl;
+                cout << "Product           : " << arr[temp].product << endl;
+                cout << "Category          : " << arr[temp].category << endl;
+                cout << "Price             : " << fixed << setprecision(2) << arr[temp].price << endl;
+                cout << "Date              : " << arr[temp].date << endl;
+                cout << "Payment Method    : " << arr[temp].paymentMethod << endl;
+                cout << "--------------------------------------" << endl;
+                temp--;
+            }
+            
+            // Check right
+            temp = mid + 1;
+            while (temp < size && strcmp(arr[temp].customerID, customerID) == 0) {
+                comparisons++;
+                cout << "--------------------------------------" << endl;
+                cout << "Customer ID       : " << arr[temp].customerID << endl;
+                cout << "Product           : " << arr[temp].product << endl;
+                cout << "Category          : " << arr[temp].category << endl;
+                cout << "Price             : " << fixed << setprecision(2) << arr[temp].price << endl;
+                cout << "Date              : " << arr[temp].date << endl;
+                cout << "Payment Method    : " << arr[temp].paymentMethod << endl;
+                cout << "--------------------------------------" << endl;
+                temp++;
+            }
+            
+            break;
+        } else if (comparison < 0) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    delete[] arr;  // Free memory
+    
+    auto end = high_resolution_clock::now();  // End timer
+    auto duration = duration_cast<microseconds>(end - start);
+    
+    if (!found) {
+        cout << "Customer ID NOT found." << endl;
+    }
+    
+    cout << "Binary Search completed." << endl;
+    cout << "Comparisons: " << comparisons << endl;
+    cout << "Time taken: " << duration.count() << " microseconds." << endl;
+}
+
+//compare search algo
+// Add this function to linkedlist.cpp to compare search algorithms
+
+void TransactionList::compareSearchAlgorithms() {
+    if (size == 0) {
+        cout << "No transactions to search, please check your data" << endl;
+        return;
+    }
+    
+    char customerID[MAX_STRING_LENGTH];
+    cout << "Enter Customer ID to search: ";
+    cin >> customerID;
+    
+    cout << "\n===== SEARCH ALGORITHM COMPARISON =====\n";
+    
+    // Measure linear search
+    auto start1 = high_resolution_clock::now();
+    bool found1 = false;
+    NodeTransaction* current = head;
+    int linearComparisons = 0;
+    
+    while(current != nullptr) {
+        linearComparisons++;
+        if(strcmp(current->data.customerID, customerID) == 0) {
+            found1 = true;
+            // In real search we would display the transaction details here
+            // but for timing purposes, we just set the found flag
+        }
+        current = current->next;
+    }
+    auto end1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<microseconds>(end1 - start1);
+    
+    // Make sure the list is sorted for binary search
+    NodeTransaction* prev = head;
+    NodeTransaction* curr = head ? head->next : nullptr;
+    bool isSorted = true;
+    
+    while (curr != nullptr) {
+        if (strcmp(prev->data.customerID, curr->data.customerID) > 0) {
+            isSorted = false;
+            break;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    
+    if (!isSorted) {
+        cout << "Sorting list by Customer ID for binary search...\n";
+        sortByCustomerID();
+    }
+    
+    // Measure binary search
+    auto start2 = high_resolution_clock::now();
+    
+    // Convert linked list to array for binary search
+    Transaction* arr = new Transaction[size];
+    NodeTransaction* node = head;
+    int index = 0;
+    
+    while (node != nullptr) {
+        arr[index++] = node->data;
+        node = node->next;
+    }
+    
+    // Binary search implementation
+    int left = 0;
+    int right = size - 1;
+    bool found2 = false;
+    int binaryComparisons = 0;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        binaryComparisons++;
+        
+        int comparison = strcmp(arr[mid].customerID, customerID);
+        
+        if (comparison == 0) {
+            found2 = true;
+            // In real search we would display the transaction here
+            break;
+        } else if (comparison < 0) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    delete[] arr;  // Free memory
+    
+    auto end2 = high_resolution_clock::now();
+    auto duration2 = duration_cast<microseconds>(end2 - start2);
+    
+    // Display results
+    cout << "\n===== SEARCH RESULTS =====\n";
+    cout << "Searching for Customer ID: " << customerID << endl;
+    cout << "Customer found: " << (found1 ? "Yes" : "No") << endl << endl;
+    
+    cout << "Linear Search:\n";
+    cout << "- Comparisons: " << linearComparisons << endl;
+    cout << "- Time taken: " << duration1.count() << " microseconds\n\n";
+    
+    cout << "Binary Search:\n";
+    cout << "- Comparisons: " << binaryComparisons << endl;
+    cout << "- Time taken: " << duration2.count() << " microseconds\n\n";
+    
+    if (duration1.count() < duration2.count()) {
+        cout << "For this dataset and search key, Linear Search was faster.\n";
+    } else if (duration2.count() < duration1.count()) {
+        cout << "For this dataset and search key, Binary Search was faster.\n";
+    } else {
+        cout << "Both algorithms performed equally fast for this search.\n";
+    }
+}
+
+
 
 // filter transactions based on multiple criteria (e.g product, category, price)
 void TransactionList::filterTransactions(){
