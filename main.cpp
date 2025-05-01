@@ -39,6 +39,15 @@ void displayLinkedListMenu() {
     cout << "Enter your choice: ";
 }
 
+// Display menu for performance comparison
+void displayPerformanceMenu() {
+    cout << "\n===== PERFORMANCE COMPARISON MENU =====\n";
+    cout << "1. Compare Sorting Performance\n";
+    cout << "2. Compare Search Performance\n";
+    cout << "3. Return to Main Menu\n";
+    cout << "Enter your choice: ";
+}
+
 int main() {
     // Relative file paths for transactions and reviews
     // Ensure these files are in the same directory as the executable
@@ -201,23 +210,64 @@ int main() {
                     break;
                 }
             }
-        } 
-        
+        }
+        // Performance comparison between arrays and linked lists 
         else if (choice == 3) {
-            cout << "Comparing performance of Arrays vs Linked Lists...\n";
-            measureSortingPerformance(transactions, transactionCount);
-            cout << "Linked List performance comparison is not implemented yet.\n";
-            
-            cout << "\nPress Enter to continue...";
-            cin.ignore();
-            cin.get();
-        } 
-        
+            int performanceChoice = 0;
+            while (true) {
+                displayPerformanceMenu();
+                cin >> performanceChoice;
+                
+                if (performanceChoice == 1) {
+                    cout << "Comparing sorting performance of Arrays vs Linked Lists...\n";
+                    cout << "\nArray-based implementation:\n";
+                    measureSortingPerformance(transactions, transactionCount);
+                    
+                    cout << "\nLinked List-based implementation:\n";
+                    // Create a linked list for comparison
+                    TransactionList transactionlist;
+                    transactionlist.loadFromCSV(transactionFile);
+                    transactionlist.measureSortingPerformance();
+                    
+                    cout << "\nPress Enter to continue...";
+                    cin.ignore();
+                    cin.get();
+                }
+                else if (performanceChoice == 2) {
+                    char customerID[MAX_STRING_LENGTH];
+                    cout << "Enter Customer ID to search: ";
+                    cin >> customerID;
+                    
+                    cout << "\nComparing search algorithms performance:\n";
+                    
+                    cout << "\nArray-based implementation:\n";
+                    compareSearchAlgorithms(transactions, transactionCount, customerID);
+                    
+                    cout << "\nLinked List-based implementation:\n";
+                    // Create a linked list for comparison
+                    TransactionList transactionlist;
+                    transactionlist.loadFromCSV(transactionFile);
+                    transactionlist.compareSearchAlgorithms(customerID);
+                    
+                    cout << "\nPress Enter to continue...";
+                    cin.ignore();
+                    cin.get();
+                }
+                else if (performanceChoice == 3) {
+                    cout << "Returning to main menu...\n";
+                    break;
+                }
+                else {
+                    cout << "Invalid choice. Please enter a number between 1 and 3.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
+            }
+        }
         else if (choice == 4) {
             cout << "Exiting Program...\n";
             break;
         }
     }
-
     return 0;
 }

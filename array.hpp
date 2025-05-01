@@ -51,4 +51,10 @@ void readReviews(const char* filename, CustomerReview reviews[], int& count);
 void processReviews(CustomerReview reviews[], int count);
 void displayMenu();
 
+// searching algorithms
+void linearSearchByCustomerID(Transaction transaction[], int count, const char* customerID);
+void binarySearchByCustomerID(Transaction transaction[], int count, const char* customerID);
+void sortByCustomerID(Transaction transaction[], int count);
+void compareSearchAlgorithms(Transaction transaction[], int count, const char* customerID);
+
 #endif

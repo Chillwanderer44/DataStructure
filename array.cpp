@@ -39,22 +39,259 @@ void readcsv(const char* filename, Transaction transactions[], int& count) {
 }
 // Search transactions by Customer ID
 void searchdata(Transaction transactions[], int count, const char* customerID) {
+    int choice;
+    cout << "Choose search algorithm:" << endl;
+    cout << "1. Linear Search" << endl;
+    cout << "2. Binary Search" << endl;
+    cout << "Enter choice: ";
+    cin >> choice;
+
+    switch (choice) {
+        case 1:
+            linearSearchByCustomerID(transactions, count, customerID);
+            break;
+        case 2:
+            binarySearchByCustomerID(transactions, count, customerID);
+            break;
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+            break;
+    }
+}
+// Seach transacations Algorithms
+// Linear and Binary Search
+
+// Linear search by customer ID
+void linearSearchByCustomerID(Transaction transactions[], int count, const char* customerID) {
+    auto start = high_resolution_clock::now();  // Start timing
+    
     bool found = false;
+    int comparisons = 0;
+    
     for (int i = 0; i < count; i++) {
+        comparisons++;
         if (strcmp(transactions[i].customerID, customerID) == 0) {
             found = true;
             cout << "--------------------------------------" << endl;
             cout << "Customer ID       : " << transactions[i].customerID << endl;
             cout << "Product           : " << transactions[i].product << endl;
             cout << "Category          : " << transactions[i].category << endl;
-            cout << "Price             : " << transactions[i].price << endl;
+            cout << "Price             : " << fixed << setprecision(2) << transactions[i].price << endl;
             cout << "Date              : " << transactions[i].date << endl;
             cout << "Payment Method    : " << transactions[i].paymentMethod << endl;
             cout << "--------------------------------------" << endl;
         }
     }
+    
+    auto end = high_resolution_clock::now();  // End timing
+    auto duration = duration_cast<microseconds>(end - start);
+    
     if (!found) {
         cout << "Customer ID not found." << endl;
+    }
+    
+    cout << "Linear Search completed." << endl;
+    cout << "Comparisons: " << comparisons << endl;
+    cout << "Time taken: " << duration.count() << " microseconds." << endl;
+}
+
+// Sort transactions by customer ID (required for binary search)
+void sortByCustomerID(Transaction transactions[], int count) {
+    auto start = high_resolution_clock::now();  // Start timing
+    
+    // Using insertion sort for simplicity
+    for (int i = 1; i < count; i++) {
+        Transaction key = transactions[i];
+        int j = i - 1;
+        
+        while (j >= 0 && strcmp(transactions[j].customerID, key.customerID) > 0) {
+            transactions[j + 1] = transactions[j];
+            j--;
+        }
+        transactions[j + 1] = key;
+    }
+    
+    auto end = high_resolution_clock::now();  // End timing
+    auto duration = duration_cast<microseconds>(end - start);
+    
+    cout << "Sorted Customer IDs using Insertion Sort" << endl;
+    cout << "Time taken: " << duration.count() << " microseconds." << endl;
+}
+
+// Binary search by customer ID
+void binarySearchByCustomerID(Transaction transactions[], int count, const char* customerID) {
+    // First check if sorted by customer ID
+    bool isSorted = true;
+    for (int i = 0; i < count - 1; i++) {
+        if (strcmp(transactions[i].customerID, transactions[i + 1].customerID) > 0) {
+            isSorted = false;
+            break;
+        }
+    }
+    
+    if (!isSorted) {
+        cout << "Data is not sorted by Customer ID. Sorting now..." << endl;
+        sortByCustomerID(transactions, count);
+    }
+    
+    auto start = high_resolution_clock::now();  // Start timing
+    
+    int left = 0;
+    int right = count - 1;
+    bool found = false;
+    int comparisons = 0;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        comparisons++;
+        
+        int comparison = strcmp(transactions[mid].customerID, customerID);
+        
+        if (comparison == 0) {
+            found = true;
+            
+            cout << "--------------------------------------" << endl;
+            cout << "Customer ID       : " << transactions[mid].customerID << endl;
+            cout << "Product           : " << transactions[mid].product << endl;
+            cout << "Category          : " << transactions[mid].category << endl;
+            cout << "Price             : " << fixed << setprecision(2) << transactions[mid].price << endl;
+            cout << "Date              : " << transactions[mid].date << endl;
+            cout << "Payment Method    : " << transactions[mid].paymentMethod << endl;
+            cout << "--------------------------------------" << endl;
+            
+            // Check for other instances with the same customer ID
+            // Check left
+            int temp = mid - 1;
+            while (temp >= 0 && strcmp(transactions[temp].customerID, customerID) == 0) {
+                comparisons++;
+                cout << "--------------------------------------" << endl;
+                cout << "Customer ID       : " << transactions[temp].customerID << endl;
+                cout << "Product           : " << transactions[temp].product << endl;
+                cout << "Category          : " << transactions[temp].category << endl;
+                cout << "Price             : " << fixed << setprecision(2) << transactions[temp].price << endl;
+                cout << "Date              : " << transactions[temp].date << endl;
+                cout << "Payment Method    : " << transactions[temp].paymentMethod << endl;
+                cout << "--------------------------------------" << endl;
+                temp--;
+            }
+            
+            // Check right
+            temp = mid + 1;
+            while (temp < count && strcmp(transactions[temp].customerID, customerID) == 0) {
+                comparisons++;
+                cout << "--------------------------------------" << endl;
+                cout << "Customer ID       : " << transactions[temp].customerID << endl;
+                cout << "Product           : " << transactions[temp].product << endl;
+                cout << "Category          : " << transactions[temp].category << endl;
+                cout << "Price             : " << fixed << setprecision(2) << transactions[temp].price << endl;
+                cout << "Date              : " << transactions[temp].date << endl;
+                cout << "Payment Method    : " << transactions[temp].paymentMethod << endl;
+                cout << "--------------------------------------" << endl;
+                temp++;
+            }
+            
+            break;
+        } else if (comparison < 0) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    auto end = high_resolution_clock::now();  // End timing
+    auto duration = duration_cast<microseconds>(end - start);
+    
+    if (!found) {
+        cout << "Customer ID not found." << endl;
+    }
+    
+    cout << "Binary Search completed." << endl;
+    cout << "Comparisons: " << comparisons << endl;
+    cout << "Time taken: " << duration.count() << " microseconds." << endl;
+}
+
+// Function to compare search algorithms
+void compareSearchAlgorithms(Transaction transactions[], int count, const char* customerID) {
+    cout << "\n===== ARRAY-BASED SEARCH ALGORITHM COMPARISON =====\n";
+    
+    // Measure linear search
+    auto start1 = high_resolution_clock::now();
+    bool found1 = false;
+    int linearComparisons = 0;
+    
+    for (int i = 0; i < count; i++) {
+        linearComparisons++;
+        if (strcmp(transactions[i].customerID, customerID) == 0) {
+            found1 = true;
+            // In real search we would display the transaction details here
+            // but for timing purposes, we just set the found flag
+        }
+    }
+    auto end1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<microseconds>(end1 - start1);
+    
+    // Check if sorted by customerID
+    bool isSorted = true;
+    for (int i = 0; i < count - 1; i++) {
+        if (strcmp(transactions[i].customerID, transactions[i + 1].customerID) > 0) {
+            isSorted = false;
+            break;
+        }
+    }
+    
+    if (!isSorted) {
+        cout << "Sorting array by Customer ID for binary search...\n";
+        sortByCustomerID(transactions, count);
+    }
+    
+    // Measure binary search
+    auto start2 = high_resolution_clock::now();
+    
+    // Binary search implementation
+    int left = 0;
+    int right = count - 1;
+    bool found2 = false;
+    int binaryComparisons = 0;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        binaryComparisons++;
+        
+        int comparison = strcmp(transactions[mid].customerID, customerID);
+        
+        if (comparison == 0) {
+            found2 = true;
+            // In real search we would display the transaction here
+            break;
+        } else if (comparison < 0) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    auto end2 = high_resolution_clock::now();
+    auto duration2 = duration_cast<microseconds>(end2 - start2);
+    
+    // Display results
+    cout << "\n===== SEARCH RESULTS =====\n";
+    cout << "Searching for Customer ID: " << customerID << endl;
+    cout << "Customer found: " << (found1 ? "Yes" : "No") << endl << endl;
+    
+    cout << "Linear Search:\n";
+    cout << "- Comparisons: " << linearComparisons << endl;
+    cout << "- Time taken: " << duration1.count() << " microseconds\n\n";
+    
+    cout << "Binary Search:\n";
+    cout << "- Comparisons: " << binaryComparisons << endl;
+    cout << "- Time taken: " << duration2.count() << " microseconds\n\n";
+    
+    if (duration1.count() < duration2.count()) {
+        cout << "For this dataset and search key, Linear Search was faster.\n";
+    } else if (duration2.count() < duration1.count()) {
+        cout << "For this dataset and search key, Binary Search was faster.\n";
+    } else {
+        cout << "Both algorithms performed equally fast for this search.\n";
     }
 }
 

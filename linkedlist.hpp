@@ -59,12 +59,12 @@ class TransactionList {
         void linearSearchByCustomerID(const char* customerID);
         void binarySearchByCustomerID(const char* customerID);
         void sortByCustomerID(); // Sort before binary search
-        void compareSearchAlgorithms();
+        void compareSearchAlgorithms(const char* customerID);
 
         //debugging
         bool hasCustomerID(const char* customerID);
         void inspectCSVFormat(const char* filename);
-        
+
 };
 
 //linked list class for reviews

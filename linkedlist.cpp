@@ -93,9 +93,6 @@ void TransactionList::loadFromCSV(const char* filename) {
     // Skip header row if exists
     getline(file, line);
     
-    // Debug: Print the first line to check format
-    cout << "Debug - First line of CSV: " << line << endl;
-    
     // Process each line
     while (getline(file, line)) {
         lineCount++;
@@ -103,11 +100,6 @@ void TransactionList::loadFromCSV(const char* filename) {
         // Skip empty lines
         if (line.empty()) {
             continue;
-        }
-        
-        // Debug the raw line occasionally
-        if (lineCount <= 3 || lineCount % 1000 == 0) {
-            cout << "Debug - Line " << lineCount << ": " << line << endl;
         }
         
         stringstream ss(line);
@@ -156,41 +148,12 @@ void TransactionList::loadFromCSV(const char* filename) {
             transaction.paymentMethod[MAX_STRING_LENGTH - 1] = '\0';
         }
         
-        // Debug: Print the first few parsed transactions
-        if (lineCount <= 3) {
-            cout << "Debug - Parsed Transaction " << lineCount << ":" << endl;
-            cout << "  Customer ID: '" << transaction.customerID << "'" << endl;
-            cout << "  Product: '" << transaction.product << "'" << endl;
-            cout << "  Category: '" << transaction.category << "'" << endl;
-            cout << "  Price: " << transaction.price << endl;
-            cout << "  Date: '" << transaction.date << "'" << endl;
-            cout << "  Payment Method: '" << transaction.paymentMethod << "'" << endl;
-        }
-        
         // Insert at the beginning (we will sort later if needed)
         insert(transaction);
     }
 
     file.close();
     cout << "Loaded " << size << " transactions from " << filename << endl;
-    
-    // Debug: Print the first few transactions in the list
-    cout << "Debug - First 3 transactions in the list:" << endl;
-    NodeTransaction* current = head;
-    int count = 0;
-    
-    while (current != nullptr && count < 3) {
-        cout << "Transaction " << (count+1) << ":" << endl;
-        cout << "  Customer ID: '" << current->data.customerID << "'" << endl;
-        cout << "  Product: '" << current->data.product << "'" << endl;
-        cout << "  Category: '" << current->data.category << "'" << endl;
-        cout << "  Price: " << current->data.price << endl;
-        cout << "  Date: '" << current->data.date << "'" << endl;
-        cout << "  Payment Method: '" << current->data.paymentMethod << "'" << endl;
-        
-        current = current->next;
-        count++;
-    }
 }
 
 // function to search for customer using customer ID
@@ -445,17 +408,13 @@ void TransactionList::binarySearchByCustomerID(const char* customerID){
 //compare search algo
 // Add this function to linkedlist.cpp to compare search algorithms
 
-void TransactionList::compareSearchAlgorithms() {
+void TransactionList::compareSearchAlgorithms(const char* customerID) {
     if (size == 0) {
         cout << "No transactions to search, please check your data" << endl;
         return;
     }
     
-    char customerID[MAX_STRING_LENGTH];
-    cout << "Enter Customer ID to search: ";
-    cin >> customerID;
-    
-    cout << "\n===== SEARCH ALGORITHM COMPARISON =====\n";
+    cout << "\n===== LINKED LIST SEARCH ALGORITHM COMPARISON =====\n";
     
     // Measure linear search
     auto start1 = high_resolution_clock::now();
@@ -556,8 +515,6 @@ void TransactionList::compareSearchAlgorithms() {
         cout << "Both algorithms performed equally fast for this search.\n";
     }
 }
-
-
 
 // filter transactions based on multiple criteria (e.g product, category, price)
 void TransactionList::filterTransactions(){
