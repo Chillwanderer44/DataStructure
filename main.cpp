@@ -7,7 +7,7 @@ using namespace std;
 
 // Function to display the main menu
 void displayMainMenu() {
-    cout << "Choose Data Structure:\n";
+    cout << "\n===== MAIN MENU =====\n";
     cout << "1. Use Array\n";
     cout << "2. Use Linked List\n";
     cout << "3. Compare Performance\n";
@@ -17,7 +17,7 @@ void displayMainMenu() {
 
 // Display menu for array operations
 void displayArrayMenu() {
-    cout << "Array Operations:\n";
+    cout << "\n===== ARRAY OPERATIONS =====\n";
     cout << "1. Search by Customer ID\n";
     cout << "2. Filter Transactions\n";
     cout << "3. Sort Transactions by Date\n";
@@ -39,11 +39,9 @@ void displayLinkedListMenu() {
     cout << "Enter your choice: ";
 }
 
-
 int main() {
     // Relative file paths for transactions and reviews
     // Ensure these files are in the same directory as the executable
-
     const char* transactionFile = "transactions_cleaned.csv";
     const char* reviewFile = "reviews_cleaned.csv";
 
@@ -53,7 +51,7 @@ int main() {
 
     // Load transactions and reviews from CSV
     readcsv(transactionFile, transactions, transactionCount);
-    if (transactionCount == 0){
+    if (transactionCount == 0) {
         std::cout << "No transactions found or failed to load the file " << endl; 
         std::cout << "Please check if the file exists in the current directory." << endl;
         return 1;
@@ -61,13 +59,12 @@ int main() {
     std::cout << "Successfully loaded " << transactionCount << " transactions " << endl;
 
     readReviews(reviewFile, reviews, reviewCount);
-
-    if(reviewCount == 0){
+    if (reviewCount == 0) {
         std::cout << "No reviews found or failed to load the file " << endl;
         std::cout << "Please check if the file exists in the current directory." << endl;
         return 1;
     }
-    std::cout << "Sucessfully loaded " << reviewCount << "reviews " << endl;
+    std::cout << "Successfully loaded " << reviewCount << " reviews " << endl;
 
     // Main menu loop
     int choice = 0;
@@ -141,18 +138,17 @@ int main() {
             }
         }        
         
-        
         else if (choice == 2) {
             // Linked List structure initialized
             TransactionList transactionlist;
             ReviewList reviewlist;
 
-            //Load data
+            // Load data
             transactionlist.loadFromCSV(transactionFile);
             reviewlist.loadFromCSV(reviewFile);
 
             int linkedListChoice = 0;
-            while(true){
+            while (true) {
                 displayLinkedListMenu();
                 cin >> linkedListChoice;
 
@@ -211,6 +207,10 @@ int main() {
             cout << "Comparing performance of Arrays vs Linked Lists...\n";
             measureSortingPerformance(transactions, transactionCount);
             cout << "Linked List performance comparison is not implemented yet.\n";
+            
+            cout << "\nPress Enter to continue...";
+            cin.ignore();
+            cin.get();
         } 
         
         else if (choice == 4) {

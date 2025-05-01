@@ -5,6 +5,9 @@
 #include <sstream>
 #include <chrono> // for performance measurement
 #include <iomanip> // for formatting
+#include <string.h>
+#include <algorithm>
+
 
 using namespace std;
 using namespace std::chrono;
@@ -67,36 +70,127 @@ NodeTransaction* TransactionList::getHead() const {
 }
 
 //load transactions from CSV
-void TransactionList::loadFromCSV (const char* filename){
+void TransactionList::loadFromCSV(const char* filename) {
     ifstream file(filename);
-    if(!file.is_open()){
+    if (!file.is_open()) {
         cerr << "Error: Unable to open file " << filename << endl;
         return;
     }
 
-    string line;
-    // Read from CSV file line by line
-    while(getline(file, line)){
-        Transaction transaction;
-        stringstream ss;
+    // Clear existing list
+    clear();
 
-        //Parse each field from the CSV
-        ss.getline(transaction.customerID, MAX_STRING_LENGTH, ',');
-        ss.getline(transaction.product, MAX_STRING_LENGTH, ',');
-        ss.getline(transaction.category, MAX_STRING_LENGTH, ',');
-        ss >> transaction.price;
-        ss.ignore();  // Ignore comma
-        ss.getline(transaction.date, MAX_STRING_LENGTH, ',');
-        ss.getline(transaction.paymentMethod, MAX_STRING_LENGTH, ',');
+    string line;
+    int lineCount = 0;
+    
+    // Check if file is empty
+    if (file.peek() == ifstream::traits_type::eof()) {
+        cerr << "Error: File is empty!" << endl;
+        file.close();
+        return;
+    }
+    
+    // Skip header row if exists
+    getline(file, line);
+    
+    // Debug: Print the first line to check format
+    cout << "Debug - First line of CSV: " << line << endl;
+    
+    // Process each line
+    while (getline(file, line)) {
+        lineCount++;
+        
+        // Skip empty lines
+        if (line.empty()) {
+            continue;
+        }
+        
+        // Debug the raw line occasionally
+        if (lineCount <= 3 || lineCount % 1000 == 0) {
+            cout << "Debug - Line " << lineCount << ": " << line << endl;
+        }
+        
+        stringstream ss(line);
+        Transaction transaction;
+        
+        // Initialize fields to empty to avoid garbage data
+        transaction.customerID[0] = '\0';
+        transaction.product[0] = '\0';
+        transaction.category[0] = '\0';
+        transaction.date[0] = '\0';
+        transaction.paymentMethod[0] = '\0';
+        transaction.price = 0.0;
+        
+        // Parse each field from the CSV
+        if (getline(ss, line, ',')) {
+            strncpy(transaction.customerID, line.c_str(), MAX_STRING_LENGTH - 1);
+            transaction.customerID[MAX_STRING_LENGTH - 1] = '\0';
+        }
+        
+        if (getline(ss, line, ',')) {
+            strncpy(transaction.product, line.c_str(), MAX_STRING_LENGTH - 1);
+            transaction.product[MAX_STRING_LENGTH - 1] = '\0';
+        }
+        
+        if (getline(ss, line, ',')) {
+            strncpy(transaction.category, line.c_str(), MAX_STRING_LENGTH - 1);
+            transaction.category[MAX_STRING_LENGTH - 1] = '\0';
+        }
+        
+        if (getline(ss, line, ',')) {
+            try {
+                transaction.price = stod(line);
+            } catch (const exception& e) {
+                cerr << "Error converting price on line " << lineCount << ": " << e.what() << endl;
+                transaction.price = 0.0;
+            }
+        }
+        
+        if (getline(ss, line, ',')) {
+            strncpy(transaction.date, line.c_str(), MAX_STRING_LENGTH - 1);
+            transaction.date[MAX_STRING_LENGTH - 1] = '\0';
+        }
+        
+        if (getline(ss, line)) {  // Get the rest of the line for payment method
+            strncpy(transaction.paymentMethod, line.c_str(), MAX_STRING_LENGTH - 1);
+            transaction.paymentMethod[MAX_STRING_LENGTH - 1] = '\0';
+        }
+        
+        // Debug: Print the first few parsed transactions
+        if (lineCount <= 3) {
+            cout << "Debug - Parsed Transaction " << lineCount << ":" << endl;
+            cout << "  Customer ID: '" << transaction.customerID << "'" << endl;
+            cout << "  Product: '" << transaction.product << "'" << endl;
+            cout << "  Category: '" << transaction.category << "'" << endl;
+            cout << "  Price: " << transaction.price << endl;
+            cout << "  Date: '" << transaction.date << "'" << endl;
+            cout << "  Payment Method: '" << transaction.paymentMethod << "'" << endl;
+        }
         
         // Insert at the beginning (we will sort later if needed)
         insert(transaction);
-
     }
 
     file.close();
     cout << "Loaded " << size << " transactions from " << filename << endl;
-
+    
+    // Debug: Print the first few transactions in the list
+    cout << "Debug - First 3 transactions in the list:" << endl;
+    NodeTransaction* current = head;
+    int count = 0;
+    
+    while (current != nullptr && count < 3) {
+        cout << "Transaction " << (count+1) << ":" << endl;
+        cout << "  Customer ID: '" << current->data.customerID << "'" << endl;
+        cout << "  Product: '" << current->data.product << "'" << endl;
+        cout << "  Category: '" << current->data.category << "'" << endl;
+        cout << "  Price: " << current->data.price << endl;
+        cout << "  Date: '" << current->data.date << "'" << endl;
+        cout << "  Payment Method: '" << current->data.paymentMethod << "'" << endl;
+        
+        current = current->next;
+        count++;
+    }
 }
 
 // function to search for customer using customer ID
@@ -130,10 +224,48 @@ void TransactionList::linearSearchByCustomerID(const char* customerID) {
     bool found = false;
     NodeTransaction* current = head;
     int comparisons = 0;
+    
+    // Create a normalized copy of the search term (trim whitespace)
+    char searchTerm[MAX_STRING_LENGTH];
+    strncpy(searchTerm, customerID, MAX_STRING_LENGTH);
+    searchTerm[MAX_STRING_LENGTH - 1] = '\0'; // Ensure null termination
+    
+    // Trim leading and trailing spaces from search term
+    char* start_ptr = searchTerm;
+    while (*start_ptr && isspace(*start_ptr)) start_ptr++;
+    
+    char* end_ptr = start_ptr + strlen(start_ptr) - 1;
+    while (end_ptr > start_ptr && isspace(*end_ptr)) *end_ptr-- = '\0';
+    
+    cout << "Searching for Customer ID: '" << start_ptr << "'" << endl;
+    
+    // Debug: Print the first few customer IDs to check format
+    cout << "Debug - First 5 customer IDs in the list:" << endl;
+    NodeTransaction* debugNode = head;
+    int debugCount = 0;
+    while (debugNode != nullptr && debugCount < 5) {
+        cout << "'" << debugNode->data.customerID << "'" << endl;
+        debugNode = debugNode->next;
+        debugCount++;
+    }
 
     while(current != nullptr) {
         comparisons++;
-        if(strcmp(current->data.customerID, customerID) == 0) {
+        
+        // Create a normalized copy of the current ID (trim whitespace)
+        char currentID[MAX_STRING_LENGTH];
+        strncpy(currentID, current->data.customerID, MAX_STRING_LENGTH);
+        currentID[MAX_STRING_LENGTH - 1] = '\0'; // Ensure null termination
+        
+        // Trim leading and trailing spaces
+        char* c_start = currentID;
+        while (*c_start && isspace(*c_start)) c_start++;
+        
+        char* c_end = c_start + strlen(c_start) - 1;
+        while (c_end > c_start && isspace(*c_end)) *c_end-- = '\0';
+        
+        // Case-insensitive comparison for better matching
+        if (strcasecmp(c_start, start_ptr) == 0) {
             found = true;
 
             cout << "--------------------------------------" << endl;
@@ -153,12 +285,17 @@ void TransactionList::linearSearchByCustomerID(const char* customerID) {
 
     if(!found) {
         cout << "Customer ID NOT found." << endl;
+        cout << "Try the following suggestions:" << endl;
+        cout << "1. Check for typos in the customer ID" << endl;
+        cout << "2. Make sure the data file contains this customer" << endl;
+        cout << "3. Check if the customer ID is case-sensitive" << endl;
     }
     
     cout << "Linear Search completed." << endl;
     cout << "Comparisons: " << comparisons << endl;
     cout << "Time taken: " << duration.count() << " microseconds." << endl;
 }
+
 //Sort linked list by customer ID (required for binary search)
 void TransactionList::sortByCustomerID(){
     if (head == nullptr || head->next == nullptr)
@@ -945,9 +1082,65 @@ void TransactionList::measureSortingPerformance(){
 // testing
 
 
+// DEBUG FUNCTIONS
+// Function to check if a customer ID exists in the list
+bool TransactionList::hasCustomerID(const char* customerID) {
+    NodeTransaction* current = head;
+    int count = 0;
+    
+    cout << "\nChecking availability of customer IDs:" << endl;
+    
+    while (current != nullptr && count < 50) {  // Check first 50 for debugging
+        if (strlen(current->data.customerID) > 0) {
+            cout << "Found customer ID: " << current->data.customerID << endl;
+            
+            // Compare ignoring case
+            if (strcasecmp(current->data.customerID, customerID) == 0) {
+                cout << "Match found for " << customerID << "!" << endl;
+                return true;
+            }
+        } else {
+            cout << "Found empty customer ID at position " << count << endl;
+        }
+        
+        current = current->next;
+        count++;
+    }
+    
+    cout << "Checked " << count << " records. Customer ID " << customerID << " not found in sample." << endl;
+    return false;
+}
 
-
-
+// Function to inspect the CSV file format
+void TransactionList::inspectCSVFormat(const char* filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Error: Unable to open file " << filename << endl;
+        return;
+    }
+    
+    string line;
+    int lineCount = 0;
+    
+    cout << "\n======= CSV File Inspection =======" << endl;
+    
+    // Get first line (likely header)
+    if (getline(file, line)) {
+        cout << "Header row: " << line << endl;
+        cout << "Fields count: " << count(line.begin(), line.end(), ',') + 1 << endl;
+    }
+    
+    // Check a few data lines
+    cout << "\nSample data rows:" << endl;
+    while (getline(file, line) && lineCount < 5) {
+        lineCount++;
+        cout << "Line " << lineCount << ": " << line << endl;
+        cout << "Fields: " << count(line.begin(), line.end(), ',') + 1 << endl;
+    }
+    
+    file.close();
+    cout << "======= End of Inspection =======" << endl;
+}
 
 
 
