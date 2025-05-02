@@ -349,13 +349,78 @@ void filterDataset(Transaction transactions[], int count) {
 
     cout << "\nTotal: " << matchCount << " transactions match the filters.\n";
 }
+// Helper function for merge sort
+void merge(Transaction arr[], int left, int mid, int right) {
+    int i, j, k;
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    
+    // Create temporary arrays
+    Transaction* L = new Transaction[n1];
+    Transaction* R = new Transaction[n2];
+    
+    // Copy data to temporary arrays
+    for (i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[mid + 1 + j];
+    
+    // Merge the temporary arrays back into arr[left..right]
+    i = 0;    // Initial index of first subarray
+    j = 0;    // Initial index of second subarray
+    k = left; // Initial index of merged subarray
+    
+    while (i < n1 && j < n2) {
+        if (strcmp(L[i].date, R[j].date) <= 0) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+    
+    // Copy the remaining elements of L[], if there are any
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+    
+    // Copy the remaining elements of R[], if there are any
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+    
+    // Free temporary arrays
+    delete[] L;
+    delete[] R;
+}
+
+// Merge sort implementation
+void mergeSortByDate(Transaction arr[], int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        
+        // Sort first and second halves
+        mergeSortByDate(arr, left, mid);
+        mergeSortByDate(arr, mid + 1, right);
+        
+        // Merge the sorted halves
+        merge(arr, left, mid, right);
+    }
+}
+
 // Selection Sort for sorting transactions by date
 void sortByDate(Transaction transactions[], int count) {
     int choice;
     cout << "Choose sorting algorithm:\n";
     cout << "1. Bubble Sort\n";
-    cout << "2. Selection Sort\n";
-    cout << "3. Insertion Sort\n";
+    cout << "2. Insertion Sort\n";
+    cout << "3. Merge Sort\n";
     cout << "Enter choice: ";
     cin >> choice;
 
@@ -373,20 +438,7 @@ void sortByDate(Transaction transactions[], int count) {
             cout << "Sorted using Bubble Sort.\n";
             break;
 
-        case 2: // Selection Sort
-            for (int i = 0; i < count - 1; i++) {
-                int minIndex = i;
-                for (int j = i + 1; j < count; j++) {
-                    if (strcmp(transactions[j].date, transactions[minIndex].date) < 0) {
-                        minIndex = j;
-                    }
-                }
-                swap(transactions[i], transactions[minIndex]);
-            }
-            cout << "Sorted using Selection Sort.\n";
-            break;
-
-        case 3: // Insertion Sort
+        case 2: // Insertion Sort
             for (int i = 1; i < count; i++) {
                 Transaction key = transactions[i];
                 int j = i - 1;
@@ -397,6 +449,11 @@ void sortByDate(Transaction transactions[], int count) {
                 transactions[j + 1] = key;
             }
             cout << "Sorted using Insertion Sort.\n";
+            break;
+
+        case 3: // Merge Sort
+            mergeSortByDate(transactions, 0, count - 1);
+            cout << "Sorted using Merge Sort.\n";
             break;
 
         default:
@@ -413,26 +470,109 @@ void sortByDate(Transaction transactions[], int count) {
     cout << "-------------------------------------------------------------------------------------------\n";
 
     for (int i = 0; i < count; i++) {
-        cout << setw(11) << transactions[i].date
+        cout << "| " << setw(11) << transactions[i].date
              << " | " << setw(11) << transactions[i].customerID
              << " | " << setw(14) << transactions[i].product
-             << " | " << setw(15) << transactions[i].category
+             << " | " << setw(12) << transactions[i].category
              << " | " << setw(7) << fixed << setprecision(2) << transactions[i].price
-             << " | " << setw(16) << transactions[i].paymentMethod << "\n";
+             << " | " << setw(16) << transactions[i].paymentMethod << " |\n";
     }
 
-   
+    cout << "Sorting completed in " << duration.count() << " microseconds.\n";
+}
+//function to calculate memory usage
+size_t calculateArrayMemoryUsage(int count) {
+    size_t memoryArray = count * sizeof(Transaction);
+    
+    return memoryArray;
+    }
 
-    cout << "Sorting completed in " << duration.count() << " microseconds.\n";
-}
 // Measure sorting performance
+// merge sort, insertion sort, bubble sort
 void measureSortingPerformance(Transaction transactions[], int count) {
-    auto start = chrono::high_resolution_clock::now();
-    sortByDate(transactions, count);
-    auto end = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
-    cout << "Sorting completed in " << duration.count() << " microseconds.\n";
+    if (count == 0) {
+        cout << "No transactions to sort, please check your data" << endl;
+        return;
+    }
+
+    cout << "Measuring sorting performance for " << count << " transactions:" << endl;
+    cout << "------------------------------------------------------" << endl;
+
+    // Calculate memory usage
+    size_t memoryUsage = calculateArrayMemoryUsage(count);
+    cout << "Memory usage: " << memoryUsage << " bytes" << endl;
+
+    // Create copies of the original array to test each algorithm
+    Transaction* bubbleArray = new Transaction[count];
+    Transaction* insertionArray = new Transaction[count];
+    Transaction* mergeArray = new Transaction[count];
+
+    // Copy original array to test arrays
+    for (int i = 0; i < count; i++) {
+        bubbleArray[i] = transactions[i];
+        insertionArray[i] = transactions[i];
+        mergeArray[i] = transactions[i];
+    }
+
+    // Measure bubble sort
+    auto start1 = high_resolution_clock::now();
+    // Bubble Sort implementation
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (strcmp(bubbleArray[j].date, bubbleArray[j + 1].date) > 0) {
+                Transaction temp = bubbleArray[j];
+                bubbleArray[j] = bubbleArray[j + 1];
+                bubbleArray[j + 1] = temp;
+            }
+        }
+    }
+    auto end1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<microseconds>(end1 - start1);
+
+    // Measure insertion sort
+    auto start2 = high_resolution_clock::now();
+    // Insertion Sort implementation
+    for (int i = 1; i < count; i++) {
+        Transaction key = insertionArray[i];
+        int j = i - 1;
+        while (j >= 0 && strcmp(insertionArray[j].date, key.date) > 0) {
+            insertionArray[j + 1] = insertionArray[j];
+            j--;
+        }
+        insertionArray[j + 1] = key;
+    }
+    auto end2 = high_resolution_clock::now();
+    auto duration2 = duration_cast<microseconds>(end2 - start2);
+
+    // Measure merge sort
+    auto start3 = high_resolution_clock::now();
+    // Merge Sort implementation
+    mergeSortByDate(mergeArray, 0, count - 1);
+    auto end3 = high_resolution_clock::now();
+    auto duration3 = duration_cast<microseconds>(end3 - start3);
+
+    // Display results
+    cout << "Bubble Sort:    " << duration1.count() << " microseconds" << endl;
+    cout << "Insertion Sort: " << duration2.count() << " microseconds" << endl;
+    cout << "Merge Sort:     " << duration3.count() << " microseconds" << endl;
+    cout << "------------------------------------------------------" << endl;
+
+    // Show the best method
+    if (duration1.count() <= duration2.count() && duration1.count() <= duration3.count()) {
+        cout << "Bubble Sort was fastest for this dataset." << endl;
+    } else if (duration2.count() <= duration1.count() && duration2.count() <= duration3.count()) {
+        cout << "Insertion Sort was fastest for this dataset." << endl;
+    } else {
+        cout << "Merge Sort was fastest for this dataset." << endl;
+    }
+
+    // Free memory
+    delete[] bubbleArray;
+    delete[] insertionArray;
+    delete[] mergeArray;
 }
+
+
 // Read and store reviews manually using an array
 // Function to read customer reviews from CSV
 void readReviews(const char* filename, CustomerReview reviews[], int& count) {
@@ -523,3 +663,5 @@ void processReviews(CustomerReview reviews[], int count) {
     }
     cout << "-------------------------------\n";
 }
+
+

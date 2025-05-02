@@ -57,4 +57,10 @@ void binarySearchByCustomerID(Transaction transaction[], int count, const char* 
 void sortByCustomerID(Transaction transaction[], int count);
 void compareSearchAlgorithms(Transaction transaction[], int count, const char* customerID);
 
+// helper for merge sort
+void mergeSortByDate(Transaction arr[], int left, int right);
+void merge(Transaction arr[], int left, int mid, int right);
+
+// memory usage
+size_t calculateArrayMemoryUsage(int count); 
 #endif

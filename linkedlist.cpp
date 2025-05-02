@@ -593,15 +593,15 @@ void TransactionList::filterTransactions(){
 }
 
 // Bubble sort implementation for linked list
-void TransactionList::bubbleSort() {
+void TransactionList::bubbleSort(bool showTiming) {
     if (head == nullptr || head->next == nullptr)
         return; // 0 or 1 node - already sorted
+    
+    auto start = high_resolution_clock::now();  // Start timing
     
     bool swapped;
     NodeTransaction* ptr1;
     NodeTransaction* lptr = nullptr;
-    
-    auto start = high_resolution_clock::now();  // Start timing
     
     do {
         swapped = false;
@@ -623,12 +623,14 @@ void TransactionList::bubbleSort() {
     auto end = high_resolution_clock::now();  // End timing
     auto duration = duration_cast<microseconds>(end - start);
     
-    cout << "Sorted using Bubble Sort (Linked List)." << endl;
-    cout << "Time taken: " << duration.count() << " microseconds." << endl;
+    if (showTiming) {
+        cout << "Sorted using Bubble Sort (Linked List)." << endl;
+        cout << "Time taken: " << duration.count() << " microseconds." << endl;
+    }
 }
 
 // Insertion sort implementation for linked list
-void TransactionList::insertionSort() {
+void TransactionList::insertionSort(bool showTiming) {
     if (head == nullptr || head->next == nullptr)
         return; // 0 or 1 node - already sorted
     
@@ -662,8 +664,10 @@ void TransactionList::insertionSort() {
     auto end = high_resolution_clock::now();  // End timing
     auto duration = duration_cast<microseconds>(end - start);
     
-    cout << "Sorted using Insertion Sort (Linked List)." << endl;
-    cout << "Time taken: " << duration.count() << " microseconds." << endl;
+    if (showTiming) {
+        cout << "Sorted using Insertion Sort (Linked List)." << endl;
+        cout << "Time taken: " << duration.count() << " microseconds." << endl;
+    }
 }
 
 // Helper function for merge sort
@@ -726,7 +730,7 @@ NodeTransaction* mergeSortHelper(NodeTransaction* head) {
 }
 
 // Merge sort implementation
-void TransactionList::mergeSort() {
+void TransactionList::mergeSort(bool showTiming) {
     if (head == nullptr || head->next == nullptr)
         return; // 0 or 1 node - already sorted
     
@@ -737,8 +741,10 @@ void TransactionList::mergeSort() {
     auto end = high_resolution_clock::now();  // End timing
     auto duration = duration_cast<microseconds>(end - start);
     
-    cout << "Sorted using Merge Sort (Linked List)." << endl;
-    cout << "Time taken: " << duration.count() << " microseconds." << endl;
+    if (showTiming) {
+        cout << "Sorted using Merge Sort (Linked List)." << endl;
+        cout << "Time taken: " << duration.count() << " microseconds." << endl;
+    }
 }
 
 // Add a function to choose and execute a sorting algorithm
@@ -972,69 +978,78 @@ void ReviewList::processReviews(){
 // 3 algorithms are used to compare the performance
 // insertion sort, bubble sort and merge sort
 
-void TransactionList::measureSortingPerformance(){
+void TransactionList::measureSortingPerformance() {
     if (size == 0) {
         cout << "No transactions to sort, please check your data" << endl;
         return;
     }
 
-    // Create 3 copies of the list to test each algorithm
-    TransactionList bubbleList, insertionList, mergeList;
-
-    //copt current list to test lists
-    NodeTransaction** nodesArray = new NodeTransaction*[size];
-    NodeTransaction* current = head;
-    int i = 0;
-    while (current != nullptr) {
-        nodesArray[i++] = current;
-        current = current->next;
-    }
-
-    // Populate the lists in reverse order of the array
-    for (int j = size - 1; j >= 0; j--) {
-        bubbleList.insert(nodesArray[j]->data);
-        insertionList.insert(nodesArray[j]->data);
-        mergeList.insert(nodesArray[j]->data);
-    }
-
-    delete[] nodesArray; // Free the array of pointers
-
     cout << "Measuring sorting performance for " << size << " transactions:" << endl;
     cout << "------------------------------------------------------" << endl;
 
-    // Measure bubble sort
+    // Calculate memory usage
+    size_t memoryUsage = calculateMemoryUsage();
+    cout << "Memory usage: " << memoryUsage << " bytes" << endl;
+
+    // Create three identical copies of the list
+    TransactionList bubbleList, insertionList, mergeList;
+    
+    // Convert the current list to an array for easier copying
+    Transaction* transArray = new Transaction[size];
+    NodeTransaction* current = head;
+    for (int i = 0; i < size && current != nullptr; i++) {
+        transArray[i] = current->data;
+        current = current->next;
+    }
+    
+    // Create identical lists for each algorithm
+    for (int i = 0; i < size; i++) {
+        bubbleList.insert(transArray[i]);
+        insertionList.insert(transArray[i]);
+        mergeList.insert(transArray[i]);
+    }
+    
+    delete[] transArray;
+    
+    // Measure each sorting algorithm with timing display turned off
     auto start1 = high_resolution_clock::now();
-    bubbleList.bubbleSort();
+    bubbleList.bubbleSort(false);
     auto end1 = high_resolution_clock::now();
     auto duration1 = duration_cast<microseconds>(end1 - start1);
-
-    // measur insetion sort
+    
     auto start2 = high_resolution_clock::now();
-    insertionList.insertionSort(); 
+    insertionList.insertionSort(false);
     auto end2 = high_resolution_clock::now();
     auto duration2 = duration_cast<microseconds>(end2 - start2);
-
-    //measure merge sort
+    
     auto start3 = high_resolution_clock::now();
-    mergeList.mergeSort();
+    mergeList.mergeSort(false);
     auto end3 = high_resolution_clock::now();
     auto duration3 = duration_cast<microseconds>(end3 - start3);
 
-    // resutls
+    // Display results - only showing the time once
     cout << "Bubble Sort:    " << duration1.count() << " microseconds" << endl;
     cout << "Insertion Sort: " << duration2.count() << " microseconds" << endl;
     cout << "Merge Sort:     " << duration3.count() << " microseconds" << endl;
     cout << "------------------------------------------------------" << endl;
 
     // Show the best method
-    if(duration1.count() <= duration2.count() && duration1.count() <= duration3.count()){
+    if (duration1.count() <= duration2.count() && duration1.count() <= duration3.count()) {
         cout << "Bubble Sort was fastest for this dataset." << endl;
-    } else if (duration2.count() <= duration1.count() && duration2.count() <= duration3.count()){
+    } else if (duration2.count() <= duration1.count() && duration2.count() <= duration3.count()) {
         cout << "Insertion Sort was fastest for this dataset." << endl;
     } else {
         cout << "Merge Sort was fastest for this dataset." << endl;
     }
 }
+
+// Function to calculate memory usage
+size_t TransactionList::calculateMemoryUsage() const{
+    size_t nodeSize = sizeof(NodeTransaction);
+
+    return size * nodeSize;
+}
+
 // End of linkedlist.cpp
 // testing
 

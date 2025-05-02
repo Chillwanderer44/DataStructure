@@ -47,9 +47,9 @@ class TransactionList {
         void searchByCustomerID(const char* customerID);
 
         //sorting algorithms
-        void bubbleSort();
-        void insertionSort();
-        void mergeSort();
+        void bubbleSort(bool showTiming = true);
+        void insertionSort(bool showTiming = true);
+        void mergeSort(bool showTiming = true);
         void sortByDate();
 
         //performance measurement
@@ -61,6 +61,9 @@ class TransactionList {
         void sortByCustomerID(); // Sort before binary search
         void compareSearchAlgorithms(const char* customerID);
 
+        //memory usage
+        size_t calculateMemoryUsage() const;
+        
         //debugging
         bool hasCustomerID(const char* customerID);
         void inspectCSVFormat(const char* filename);
