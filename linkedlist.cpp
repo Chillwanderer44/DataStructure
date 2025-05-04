@@ -549,7 +549,7 @@ void TransactionList::filterTransactions(){
 }
 
 // Bubble sort implementation for linked list
-void TransactionList::bubbleSort(bool showTiming) {
+void TransactionList::bubbleSort(bool showTiming, bool showDisplay) {
     if (head == nullptr || head->next == nullptr)
         return; // 0 or 1 node - already sorted
     
@@ -578,7 +578,11 @@ void TransactionList::bubbleSort(bool showTiming) {
     
     auto end = high_resolution_clock::now();  // End timing
     auto duration = duration_cast<microseconds>(end - start);
-    
+
+    if (showDisplay) {
+        display(); // Display sorted transactions
+    }
+
     if (showTiming) {
         cout << "Sorted using Bubble Sort (Linked List)." << endl;
         cout << "Time taken: " << duration.count() << " microseconds." << endl;
@@ -586,7 +590,7 @@ void TransactionList::bubbleSort(bool showTiming) {
 }
 
 // Insertion sort implementation for linked list
-void TransactionList::insertionSort(bool showTiming) {
+void TransactionList::insertionSort(bool showTiming, bool showDisplay) {
     if (head == nullptr || head->next == nullptr)
         return; // 0 or 1 node - already sorted
     
@@ -619,6 +623,10 @@ void TransactionList::insertionSort(bool showTiming) {
     
     auto end = high_resolution_clock::now();  // End timing
     auto duration = duration_cast<microseconds>(end - start);
+
+    if (showDisplay) {
+        display(); // Display sorted transactions
+    }
     
     if (showTiming) {
         cout << "Sorted using Insertion Sort (Linked List)." << endl;
@@ -686,7 +694,7 @@ NodeTransaction* mergeSortHelper(NodeTransaction* head) {
 }
 
 // Merge sort implementation
-void TransactionList::mergeSort(bool showTiming) {
+void TransactionList::mergeSort(bool showTiming, bool showDisplay) {
     if (head == nullptr || head->next == nullptr)
         return; // 0 or 1 node - already sorted
     
@@ -696,6 +704,10 @@ void TransactionList::mergeSort(bool showTiming) {
     
     auto end = high_resolution_clock::now();  // End timing
     auto duration = duration_cast<microseconds>(end - start);
+
+    if (showDisplay){
+        display(); // Display sorted transactions
+    }
     
     if (showTiming) {
         cout << "Sorted using Merge Sort (Linked List)." << endl;
@@ -728,8 +740,7 @@ void TransactionList::sortByDate() {
             return;
     }
     
-    cout << "Transactions sorted by date." << endl;
-    display();
+
 }
 
 //ReviewList constructor
@@ -974,17 +985,17 @@ void TransactionList::measureSortingPerformance() {
     
     // Measure each sorting algorithm with timing display turned off
     auto start1 = high_resolution_clock::now();
-    bubbleList.bubbleSort(false);
+    bubbleList.bubbleSort(false, false);
     auto end1 = high_resolution_clock::now();
     auto duration1 = duration_cast<microseconds>(end1 - start1);
     
     auto start2 = high_resolution_clock::now();
-    insertionList.insertionSort(false);
+    insertionList.insertionSort(false, false);
     auto end2 = high_resolution_clock::now();
     auto duration2 = duration_cast<microseconds>(end2 - start2);
     
     auto start3 = high_resolution_clock::now();
-    mergeList.mergeSort(false);
+    mergeList.mergeSort(false, false);
     auto end3 = high_resolution_clock::now();
     auto duration3 = duration_cast<microseconds>(end3 - start3);
 

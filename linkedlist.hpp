@@ -47,9 +47,9 @@ class TransactionList {
         void searchByCustomerID(const char* customerID);
 
         //sorting algorithms
-        void bubbleSort(bool showTiming = true);
-        void insertionSort(bool showTiming = true);
-        void mergeSort(bool showTiming = true);
+        void bubbleSort(bool showTiming = true, bool showDisplay = true);
+        void insertionSort(bool showTiming = true, bool showDisplay = true);
+        void mergeSort(bool showTiming = true, bool showDisplay = true);
         void sortByDate();
 
         //performance measurement
