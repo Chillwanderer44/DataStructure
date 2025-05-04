@@ -23,6 +23,9 @@ void readcsv(const char* filename, Transaction transactions[], int& count) {
     string line;
     count = 0;
 
+    // Skip header row
+    getline(file, line);
+
     while (getline(file, line) && count < MAX_TRANSACTIONS) {
         stringstream ss(line);
         ss.getline(transactions[count].customerID, MAX_STRING_LENGTH, ',');
@@ -213,6 +216,14 @@ void binarySearchByCustomerID(Transaction transactions[], int count, const char*
 // Function to compare search algorithms
 void compareSearchAlgorithms(Transaction transactions[], int count, const char* customerID) {
     cout << "\n===== ARRAY-BASED SEARCH ALGORITHM COMPARISON =====\n";
+
+    // Add memory usage calculation
+    size_t linearMemory = calculateSearchMemoryUsage(count, false);
+    size_t binaryMemory = calculateSearchMemoryUsage(count, true);
+    
+    cout << "Memory usage:\n";
+    cout << "- Linear Search: " << linearMemory / 1024 << " KB\n";
+    cout << "- Binary Search: " << binaryMemory / 1024 << " KB\n\n";
     
     // Measure linear search
     auto start1 = high_resolution_clock::now();
@@ -280,11 +291,13 @@ void compareSearchAlgorithms(Transaction transactions[], int count, const char* 
     
     cout << "Linear Search:\n";
     cout << "- Comparisons: " << linearComparisons << endl;
-    cout << "- Time taken: " << duration1.count() << " microseconds\n\n";
+    cout << "- Time taken: " << duration1.count() << " microseconds\n";
+    cout << "- Memory used: " << linearMemory / 1024 << " KB\n\n";
     
     cout << "Binary Search:\n";
     cout << "- Comparisons: " << binaryComparisons << endl;
-    cout << "- Time taken: " << duration2.count() << " microseconds\n\n";
+    cout << "- Time taken: " << duration2.count() << " microseconds\n";
+    cout << "- Memory used: " << binaryMemory / 1024 << " KB\n\n";
     
     if (duration1.count() < duration2.count()) {
         cout << "For this dataset and search key, Linear Search was faster.\n";
@@ -494,13 +507,18 @@ void measureSortingPerformance(Transaction transactions[], int count) {
         cout << "No transactions to sort, please check your data" << endl;
         return;
     }
+    // Calculate memory usage for each algorithm
+    size_t bubbleMemory = calculateArrayMemoryUsage(count, "bubble");
+    size_t insertionMemory = calculateArrayMemoryUsage(count, "insertion");
+    size_t mergeMemory = calculateArrayMemoryUsage(count, "merge");
+    
+    cout << "Memory usage:" << endl;
+    cout << "Bubble Sort: " << bubbleMemory / 1024.0 << " KB" << endl;
+    cout << "Insertion Sort: " << insertionMemory / 1024.0 << " KB" << endl;
+    cout << "Merge Sort: " << mergeMemory / 1024.0 << " KB" << endl;
 
     cout << "Measuring sorting performance for " << count << " transactions:" << endl;
     cout << "------------------------------------------------------" << endl;
-
-    // Calculate memory usage
-    size_t memoryUsage = calculateArrayMemoryUsage(count);
-    cout << "Memory usage: " << memoryUsage << " bytes" << endl;
 
     // Create copies of the original array to test each algorithm
     Transaction* bubbleArray = new Transaction[count];
@@ -662,6 +680,41 @@ void processReviews(CustomerReview reviews[], int count) {
              << "| " << setw(13) << wordArray[i].frequency << " |\n";
     }
     cout << "-------------------------------\n";
+}
+
+// funciton to calculate memory usage
+size_t calculateSearchMemoryUsage(int count, bool isBinary) {
+    size_t memoryUsage = count * sizeof(Transaction); // Base array memory
+    
+    if (isBinary) {
+        // For binary search, we need a sorted array
+        memoryUsage += sizeof(int) * 3; // left, right, mid variables
+    } else {
+        // For linear search, we only need a counter variable
+        memoryUsage += sizeof(int); // loop counter
+    }
+    
+    return memoryUsage;
+}
+
+size_t calculateArrayMemoryUsage(int count, const char* algorithm = "general") {
+    size_t memoryArray = count * sizeof(Transaction);
+    size_t additionalMemory = 0;
+    
+    if (strcmp(algorithm, "bubble") == 0) {
+        // Bubble sort uses a temp variable for swapping
+        additionalMemory = sizeof(Transaction); // One temp variable
+    } 
+    else if (strcmp(algorithm, "insertion") == 0) {
+        // Insertion sort uses a key variable
+        additionalMemory = sizeof(Transaction); // Key variable
+    }
+    else if (strcmp(algorithm, "merge") == 0) {
+        // Merge sort uses temporary arrays
+        additionalMemory = count * sizeof(Transaction); // Temporary arrays
+    }
+    
+    return memoryArray + additionalMemory;
 }
 
 

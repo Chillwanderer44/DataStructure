@@ -79,81 +79,41 @@ void TransactionList::loadFromCSV(const char* filename) {
 
     // Clear existing list
     clear();
-
+    
     string line;
     int lineCount = 0;
-    
-    // Check if file is empty
-    if (file.peek() == ifstream::traits_type::eof()) {
-        cerr << "Error: File is empty!" << endl;
-        file.close();
-        return;
-    }
-    
-    // Skip header row if exists
-    getline(file, line);
+    bool headerSkipped = false;
     
     // Process each line
     while (getline(file, line)) {
-        lineCount++;
-        
-        // Skip empty lines
-        if (line.empty()) {
+        // Skip header row
+        if (!headerSkipped) {
+            headerSkipped = true;
             continue;
         }
         
-        stringstream ss(line);
+        lineCount++;
+        
         Transaction transaction;
+        stringstream ss(line);
         
-        // Initialize fields to empty to avoid garbage data
-        transaction.customerID[0] = '\0';
-        transaction.product[0] = '\0';
-        transaction.category[0] = '\0';
-        transaction.date[0] = '\0';
-        transaction.paymentMethod[0] = '\0';
-        transaction.price = 0.0;
+        // Parse CSV exactly as the array implementation does
+        ss.getline(transaction.customerID, MAX_STRING_LENGTH, ',');
+        ss.getline(transaction.product, MAX_STRING_LENGTH, ',');
+        ss.getline(transaction.category, MAX_STRING_LENGTH, ',');
+        ss >> transaction.price;
+        ss.ignore();  // Ignore comma
+        ss.getline(transaction.date, MAX_STRING_LENGTH, ',');
+        ss.getline(transaction.paymentMethod, MAX_STRING_LENGTH);  // Read to end of line
         
-        // Parse each field from the CSV
-        if (getline(ss, line, ',')) {
-            strncpy(transaction.customerID, line.c_str(), MAX_STRING_LENGTH - 1);
-            transaction.customerID[MAX_STRING_LENGTH - 1] = '\0';
-        }
-        
-        if (getline(ss, line, ',')) {
-            strncpy(transaction.product, line.c_str(), MAX_STRING_LENGTH - 1);
-            transaction.product[MAX_STRING_LENGTH - 1] = '\0';
-        }
-        
-        if (getline(ss, line, ',')) {
-            strncpy(transaction.category, line.c_str(), MAX_STRING_LENGTH - 1);
-            transaction.category[MAX_STRING_LENGTH - 1] = '\0';
-        }
-        
-        if (getline(ss, line, ',')) {
-            try {
-                transaction.price = stod(line);
-            } catch (const exception& e) {
-                cerr << "Error converting price on line " << lineCount << ": " << e.what() << endl;
-                transaction.price = 0.0;
-            }
-        }
-        
-        if (getline(ss, line, ',')) {
-            strncpy(transaction.date, line.c_str(), MAX_STRING_LENGTH - 1);
-            transaction.date[MAX_STRING_LENGTH - 1] = '\0';
-        }
-        
-        if (getline(ss, line)) {  // Get the rest of the line for payment method
-            strncpy(transaction.paymentMethod, line.c_str(), MAX_STRING_LENGTH - 1);
-            transaction.paymentMethod[MAX_STRING_LENGTH - 1] = '\0';
-        }
-        
-        // Insert at the beginning (we will sort later if needed)
+        // Insert at the beginning
         insert(transaction);
     }
 
     file.close();
+    
     cout << "Loaded " << size << " transactions from " << filename << endl;
+
 }
 
 // function to search for customer using customer ID
@@ -201,16 +161,6 @@ void TransactionList::linearSearchByCustomerID(const char* customerID) {
     while (end_ptr > start_ptr && isspace(*end_ptr)) *end_ptr-- = '\0';
     
     cout << "Searching for Customer ID: '" << start_ptr << "'" << endl;
-    
-    // Debug: Print the first few customer IDs to check format
-    cout << "Debug - First 5 customer IDs in the list:" << endl;
-    NodeTransaction* debugNode = head;
-    int debugCount = 0;
-    while (debugNode != nullptr && debugCount < 5) {
-        cout << "'" << debugNode->data.customerID << "'" << endl;
-        debugNode = debugNode->next;
-        debugCount++;
-    }
 
     while(current != nullptr) {
         comparisons++;
@@ -415,6 +365,14 @@ void TransactionList::compareSearchAlgorithms(const char* customerID) {
     }
     
     cout << "\n===== LINKED LIST SEARCH ALGORITHM COMPARISON =====\n";
+
+    // memory usage calculation
+    size_t linearMemory = calculateSearchMemoryUsage(false);
+    size_t binaryMemory = calculateSearchMemoryUsage(true);
+    
+    cout << "Memory usage:\n";
+    cout << "- Linear Search: " << linearMemory / 1024 << " KB\n";
+    cout << "- Binary Search: " << binaryMemory / 1024 << " KB\n\n";
     
     // Measure linear search
     auto start1 = high_resolution_clock::now();
@@ -426,8 +384,6 @@ void TransactionList::compareSearchAlgorithms(const char* customerID) {
         linearComparisons++;
         if(strcmp(current->data.customerID, customerID) == 0) {
             found1 = true;
-            // In real search we would display the transaction details here
-            // but for timing purposes, we just set the found flag
         }
         current = current->next;
     }
@@ -773,8 +729,7 @@ void TransactionList::sortByDate() {
     }
     
     cout << "Transactions sorted by date." << endl;
-    // Uncomment if you want to display the sorted list immediately
-    // display();
+    display();
 }
 
 //ReviewList constructor
@@ -861,7 +816,7 @@ void ReviewList::loadFromCSV(const char* filename){
         insert(review);
     }
     file.close();
-    std::cout << "loaded" << size << "reviews from " << filename << endl;
+    std::cout << "loaded " << size << " reviews from " << filename << endl;
 }
 
 //processs reviews to find the most common word
@@ -987,9 +942,15 @@ void TransactionList::measureSortingPerformance() {
     cout << "Measuring sorting performance for " << size << " transactions:" << endl;
     cout << "------------------------------------------------------" << endl;
 
-    // Calculate memory usage
-    size_t memoryUsage = calculateMemoryUsage();
-    cout << "Memory usage: " << memoryUsage << " bytes" << endl;
+    // Calculate memory usage for each algorithm
+    size_t bubbleMemory = calculateSortMemoryUsage("bubble");
+    size_t insertionMemory = calculateSortMemoryUsage("insertion");
+    size_t mergeMemory = calculateSortMemoryUsage("merge");
+    
+    cout << "Memory usage:" << endl;
+    cout << "Bubble Sort: " << bubbleMemory / 1024.0 << " KB" << endl;
+    cout << "Insertion Sort: " << insertionMemory / 1024.0 << " KB" << endl;
+    cout << "Merge Sort: " << mergeMemory / 1024.0 << " KB" << endl;
 
     // Create three identical copies of the list
     TransactionList bubbleList, insertionList, mergeList;
@@ -1028,6 +989,8 @@ void TransactionList::measureSortingPerformance() {
     auto duration3 = duration_cast<microseconds>(end3 - start3);
 
     // Display results - only showing the time once
+    cout << "------------------------------------------------------" << endl;
+    cout << "Sorting performance results:" << endl;
     cout << "Bubble Sort:    " << duration1.count() << " microseconds" << endl;
     cout << "Insertion Sort: " << duration2.count() << " microseconds" << endl;
     cout << "Merge Sort:     " << duration3.count() << " microseconds" << endl;
@@ -1043,11 +1006,42 @@ void TransactionList::measureSortingPerformance() {
     }
 }
 
-// Function to calculate memory usage
-size_t TransactionList::calculateMemoryUsage() const{
-    size_t nodeSize = sizeof(NodeTransaction);
+// function to calculate memory usage
+size_t TransactionList::calculateSearchMemoryUsage(bool isBinary) const {
+    size_t baseMemory = size * sizeof(NodeTransaction); // Memory for the whole list
+    
+    if (isBinary) {
+        // For binary search, we convert to array + additional variables
+        baseMemory += size * sizeof(Transaction); // Temporary array
+        baseMemory += sizeof(int) * 3; // left, right, mid variables
+    } else {
+        // For linear search, we just need a pointer
+        baseMemory += sizeof(NodeTransaction*); // current pointer
+    }
+    
+    return baseMemory;
+}
 
-    return size * nodeSize;
+size_t TransactionList::calculateSortMemoryUsage(const char* algorithm) const {
+    size_t baseMemory = size * sizeof(NodeTransaction); // Memory for the whole list
+    size_t additionalMemory = 0;
+    
+    if (strcmp(algorithm, "bubble") == 0) {
+        // Bubble sort uses pointers and a temp variable
+        additionalMemory = sizeof(Transaction) + sizeof(NodeTransaction*) * 2;
+    } 
+    else if (strcmp(algorithm, "insertion") == 0) {
+        // Insertion sort creates a new list
+        additionalMemory = sizeof(NodeTransaction*) * 2;
+    }
+    else if (strcmp(algorithm, "merge") == 0) {
+        // Merge sort uses recursion and additional pointers
+        additionalMemory = sizeof(NodeTransaction*) * 3; // head pointers for left, right, merged
+        // Plus recursive call stack (estimated)
+        additionalMemory += log2(size) * sizeof(NodeTransaction*) * 3;
+    }
+    
+    return baseMemory + additionalMemory;
 }
 
 // End of linkedlist.cpp
@@ -1113,6 +1107,7 @@ void TransactionList::inspectCSVFormat(const char* filename) {
     file.close();
     cout << "======= End of Inspection =======" << endl;
 }
+
 
 
 

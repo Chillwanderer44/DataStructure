@@ -62,5 +62,7 @@ void mergeSortByDate(Transaction arr[], int left, int right);
 void merge(Transaction arr[], int left, int mid, int right);
 
 // memory usage
-size_t calculateArrayMemoryUsage(int count); 
+size_t calculateSearchMemoryUsage(int count, bool isBinary);
+size_t calculateArrayMemoryUsage(int count, const char* algorithm);
+
 #endif

@@ -62,8 +62,9 @@ class TransactionList {
         void compareSearchAlgorithms(const char* customerID);
 
         //memory usage
-        size_t calculateMemoryUsage() const;
-        
+        size_t calculateSearchMemoryUsage(bool isBinary) const;
+        size_t calculateSortMemoryUsage(const char* algorithm = "general") const;
+
         //debugging
         bool hasCustomerID(const char* customerID);
         void inspectCSVFormat(const char* filename);
