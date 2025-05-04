@@ -207,6 +207,9 @@ void TransactionList::linearSearchByCustomerID(const char* customerID) {
     cout << "Linear Search completed." << endl;
     cout << "Comparisons: " << comparisons << endl;
     cout << "Time taken: " << duration.count() << " microseconds." << endl;
+    size_t linearMemory = calculateSearchMemoryUsage(false);
+    cout << "Memory used: " << linearMemory / 1024 << " KB\n";
+
 }
 
 //Sort linked list by customer ID (required for binary search)
@@ -353,6 +356,8 @@ void TransactionList::binarySearchByCustomerID(const char* customerID){
     cout << "Binary Search completed." << endl;
     cout << "Comparisons: " << comparisons << endl;
     cout << "Time taken: " << duration.count() << " microseconds." << endl;
+    size_t binaryMemory = calculateSearchMemoryUsage(true);
+    cout << "Memory used: " << binaryMemory / 1024 << " KB\n";
 }
 
 //compare search algo
